@@ -1,0 +1,207 @@
+:root {
+    --color-bg-primary: #ffffff;
+    --color-bg-secondary: #f9fafb;
+    --color-bg-accent: #86c8f3;
+    --color-text-primary: #1f2937;
+    --color-text-secondary: #4b5563;
+    --color-border: #e5e7eb;
+    --color-shadow: rgba(0, 0, 0, 0.1);
+    --color-accent: #3b82f6;
+    --color-accent-hover: #2563eb;
+    --color-error-bg: #fee2e2;
+    --color-error-text: #b91c1c;
+    --color-error-border: #f87171;
+    --table-stripe-bg: #f9fafb;
+    --transition-speed: 0.3s;
+  }
+  
+  .dark-theme {
+    --color-bg-primary: #1f2937;
+    --color-bg-secondary: #111827;
+    --color-bg-accent: #0c4a6e;
+    --color-text-primary: #f3f4f6;
+    --color-text-secondary: #d1d5db;
+    --color-border: #374151;
+    --color-shadow: rgba(0, 0, 0, 0.3);
+    --color-accent: #3b82f6;
+    --color-accent-hover: #60a5fa;
+    --color-error-bg: #7f1d1d;
+    --color-error-text: #fecaca;
+    --color-error-border: #ef4444;
+    --table-stripe-bg: #111827;
+  }
+  
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+  
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.5;
+    background-color: var(--color-bg-secondary);
+    color: var(--color-text-primary);
+    transition: 
+      background-color var(--transition-speed),
+      color var(--transition-speed);
+  }
+  
+  .container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1rem;
+  }
+  
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+  }
+  
+  h1 {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--color-text-primary);
+  }
+  
+  .error-message {
+    background-color: var(--color-error-bg);
+    border: 1px solid var(--color-error-border);
+    color: var(--color-error-text);
+    padding: 0.75rem 1rem;
+    border-radius: 0.25rem;
+    margin-bottom: 1rem;
+  }
+  
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  @media (min-width: 768px) {
+    .form-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+  
+  .form-group {
+    margin-bottom: 1rem;
+  }
+  
+  label {
+    display: block;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    color: var(--color-text-primary);
+  }
+  
+  select {
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--color-border);
+    border-radius: 0.25rem;
+    background-color: var(--color-bg-primary);
+    color: var(--color-text-primary);
+    font-size: 1rem;
+    transition: border-color var(--transition-speed);
+  }
+  
+  select:focus {
+    outline: none;
+    border-color: var(--color-accent);
+  }
+  
+  select:disabled {
+    background-color: var(--color-bg-secondary);
+    cursor: not-allowed;
+  }
+  
+  .loading {
+    display: flex;
+    justify-content: center;
+    margin: 1.5rem 0;
+  }
+  
+  .spinner {
+    width: 32px;
+    height: 32px;
+    border: 4px solid rgba(0, 0, 0, 0.1);
+    border-left-color: var(--color-accent);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  
+  .dark-theme .spinner {
+    border-color: rgba(255, 255, 255, 0.2);
+    border-left-color: var(--color-accent);
+  }
+  
+  .table-container {
+    padding-top: 20px;
+    overflow-x: auto;
+    border-radius: 0.25rem;
+    box-shadow: 0 1px 3px var(--color-shadow);
+  }
+  
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: var(--color-bg-primary);
+  }
+  
+  th, td {
+    padding: 0.75rem 1rem;
+    text-align: left;
+    border-bottom: 1px solid var(--color-border);
+  }
+  
+  th {
+    background-color: var(--color-bg-secondary);
+    font-weight: 600;
+    color: var(--color-text-primary);
+  }
+  
+  tr:nth-child(even) {
+    background-color: var(--table-stripe-bg);
+  }
+  
+  tr:last-child td {
+    border-bottom: none;
+  }
+  
+  .text-center {
+    text-align: center;
+  }
+  
+  .info-message {
+    text-align: center;
+    padding: 2rem 0;
+    background-color: var(--color-bg-accent);
+    border-radius: 0.25rem;
+    color: var(--color-text-primary);
+    margin-top: 1rem;
+  }
+
+  .info-message a{
+    color: var(--color-text-primary);
+  }
+  
+  .fade-enter-active,
+  .fade-leave-active {
+    transition: opacity var(--transition-speed);
+  }
+  
+  .fade-enter-from,
+  .fade-leave-to {
+    opacity: 0;
+  }
