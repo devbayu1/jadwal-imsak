@@ -1,86 +1,89 @@
 <template>
   <div class="container">
     <div class="header">
-      <h1>Jadwal Imsakiyah</h1>
+      <div class="header-left">
+        <h1>Jadwal Imsakiyah</h1>
+
+        <!-- ✅ Tombol kembali ke domain utama -->
+        <a href="/" class="btn-back cursor-pointer">← Kembali ke Beranda</a>
+      </div>
+
       <DarkModeToggle />
     </div>
 
-    <!-- Pesan Error -->
+    <!-- Error -->
     <div v-if="error" class="error-message">
       {{ error }}
     </div>
 
-    <!-- Form Seleksi -->
+    <!-- FORM -->
     <div class="form-grid">
-      <!-- Pilih Provinsi -->
+      <!-- KOTA SEARCHABLE -->
       <div class="form-group">
-        <label for="provinsi">Pilih Provinsi</label>
-        <select id="provinsi" v-model="selectedProvinsi" :disabled="loading || provinsi.length === 0" @change="handleProvinsiChange">
-          <option value="">-- Pilih Provinsi --</option>
-          <option v-for="p in provinsi" :key="p" :value="p">{{ p }}</option>
-        </select>
+        <label>Cari Kota / Kabupaten</label>
+
+        <Select
+          v-model="selectedKota"
+          :options="kotaList"
+          :get-option-label="(option) => option.lokasi"
+          :get-option-value="(option) => option.id"
+          placeholder="Ketik nama kota..."
+          searchable
+          clearable
+          @update:modelValue="fetchJadwal"
+        />
       </div>
 
-      <!-- Pilih Kota -->
-      <div class="form-grou">
-        <label for="kota">Pilih Kota/Kabupaten</label>
-        <select id="kota" v-model="selectedKota" :disabled="loading || kota.length === 0 || !selectedProvinsi" @change="handleKotaChange">
-          <option value="">-- Pilih Kota --</option>
-          <option v-for="k in kota" :key="k" :value="k">{{ k }}</option>
-        </select>
+      <!-- BULAN -->
+      <div class="form-group">
+        <label>Bulan</label>
+        <VueDatePicker v-model="selectedMonth" month-picker @update:modelValue="fetchJadwal"></VueDatePicker>
       </div>
     </div>
 
-    <!-- Loading indicator -->
+    <!-- LOADING -->
     <div v-if="loading" class="loading">
       <div class="spinner"></div>
     </div>
 
-    <!-- Jadwal Table -->
-    <transition name="fade" mode="out-in">
-      <div v-if="jadwal.length > 0" class="table-container">
-        <table>
-          <thead>
-            <tr>
-              <th>Tanggal</th>
-              <th>Imsak</th>
-              <th>Subuh</th>
-              <th>Terbit</th>
-              <th>Dhuha</th>
-              <th>Dzuhur</th>
-              <th>Ashar</th>
-              <th>Maghrib</th>
-              <th>Isya</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="(item, index) in jadwal" :key="index">
-              <td>{{ item.tanggal }}</td>
-              <td>{{ item.imsak }}</td>
-              <td>{{ item.subuh }}</td>
-              <td>{{ item.terbit }}</td>
-              <td>{{ item.dhuha }}</td>
-              <td>{{ item.dzuhur }}</td>
-              <td>{{ item.ashar }}</td>
-              <td>{{ item.maghrib }}</td>
-              <td>{{ item.isya }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <!-- Pesan Informasi -->
-      <div v-else-if="selectedKota && !loading" class="info-message">Tidak ada jadwal tersedia untuk kota yang dipilih</div>
-    </transition>
-
-    <div v-if="!selectedProvinsi && !loading" class="info-message">Silakan pilih provinsi untuk melihat daftar kota</div>
-
-    <div v-else-if="selectedProvinsi && !selectedKota && !loading && kota.length > 0" class="info-message">
-      Silakan pilih kota untuk melihat jadwal
+    <!-- TABLE -->
+    <div v-if="jadwal.length" class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Tanggal</th>
+            <th>Imsak</th>
+            <th>Subuh</th>
+            <th>Terbit</th>
+            <th>Dhuha</th>
+            <th>Dzuhur</th>
+            <th>Ashar</th>
+            <th>Maghrib</th>
+            <th>Isya</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="(item, index) in jadwal" :key="index">
+            <td>{{ item.tanggal }}</td>
+            <td>{{ item.imsak }}</td>
+            <td>{{ item.subuh }}</td>
+            <td>{{ item.terbit }}</td>
+            <td>{{ item.dhuha }}</td>
+            <td>{{ item.dzuhur }}</td>
+            <td>{{ item.ashar }}</td>
+            <td>{{ item.maghrib }}</td>
+            <td>{{ item.isya }}</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
+
+    <!-- INFO -->
+    <div v-if="!jadwal.length && !loading" class="info-message">Pilih kota dan bulan untuk melihat jadwal</div>
+
     <div class="info-message">
-        API menggunakan <a href="https://equran.id/apidev/imsakiyah" target="_blank">equran.id</a>,
-        Sumber dari data pada API ini adalah Bimas Islam Kemenag RI
+      API menggunakan
+      <a href="https://api.myquran.com" target="_blank">myquran.com</a>
     </div>
   </div>
 </template>
@@ -88,90 +91,96 @@
 <script>
 import axios from "axios";
 import DarkModeToggle from "./DarkModeToggle.vue";
+import Select from "vue3-select-component";
+import "vue3-select-component/styles";
+import { VueDatePicker } from "@vuepic/vue-datepicker";
+import "@vuepic/vue-datepicker/dist/main.css";
 
 export default {
   name: "JadwalView",
+
   components: {
     DarkModeToggle,
+    Select,
+    VueDatePicker,
   },
+
   data() {
     return {
-      provinsi: [],
-      kota: [],
-      jadwal: [],
-      selectedProvinsi: "",
+      kotaList: [],
       selectedKota: "",
+      selectedMonth: null,
+      jadwal: [],
       loading: false,
       error: null,
     };
   },
+
   mounted() {
-    this.fetchProvinsi();
+    this.setDefaultMonth();
+    this.fetchKota();
   },
+
   methods: {
-    async fetchProvinsi() {
-      this.loading = true;
-      try {
-        const response = await axios.get("https://equran.id/api/v2/imsakiyah/provinsi");
-        this.provinsi = response.data.data;
-        this.error = null;
-      } catch (err) {
-        this.error = "Gagal mengambil data provinsi";
-        console.error("Error fetching provinsi:", err);
-      } finally {
-        this.loading = false;
-      }
+    // ✅ Default bulan sekarang
+    setDefaultMonth() {
+      const now = new Date();
+      // const tahun = now.getFullYear();
+      // const bulan = String(now.getMonth() + 1).padStart(2, "0");
+      this.selectedMonth = {
+        month: new Date().getMonth(),
+        year: new Date().getFullYear(),
+      };
     },
+
+    // ✅ Ambil semua kota
     async fetchKota() {
-      if (!this.selectedProvinsi) {
-        this.kota = [];
-        return;
-      }
-
-      this.loading = true;
       try {
-        const response = await axios.post(`https://equran.id/api/v2/imsakiyah/kabkota`, {
-          provinsi: this.selectedProvinsi,
-        });
-        this.kota = response.data.data;
-        this.selectedKota = "";
-        this.jadwal = [];
-        this.error = null;
+        const res = await axios.get("https://api.myquran.com/v3/sholat/kabkota/semua");
+
+        this.kotaList = res.data.data;
+
+        // ✅ Default Jakarta
+        const selectedC = this.kotaList.find((k) => k.lokasi.toLowerCase().includes("pacitan"));
+
+        if (selectedC) {
+          this.selectedKota = selectedC.id;
+          this.fetchJadwal();
+        }
       } catch (err) {
-        this.error = "Gagal mengambil data kota";
-        console.error("Error fetching kota:", err);
-      } finally {
-        this.loading = false;
+        this.error = "Gagal mengambil daftar kota";
+        console.error(err);
       }
     },
+
+    // ✅ Ambil jadwal sholat
     async fetchJadwal() {
-      if (!this.selectedKota) {
-        this.jadwal = [];
-        return;
-      }
-
+      if (!this.selectedKota || !this.selectedMonth) return;
+      console.log(this.selectedMonth);
+      console.log(new Date());
       this.loading = true;
-      try {
-        const response = await axios.post(`https://equran.id/api/v2/imsakiyah`, {
-          kabkota: this.selectedKota,
-          provinsi: this.selectedProvinsi,
-        });
+      this.jadwal = [];
+      const year = this.selectedMonth.year;
+      const month = String(this.selectedMonth.month + 1).padStart(2, "0"); // ← WAJIB +1
+      const formattedMonth = `${year}-${month}`;
 
-        this.jadwal = response.data.data[0].imsakiyah;
+      try {
+        const res = await axios.get(`https://api.myquran.com/v3/sholat/jadwal/${this.selectedKota}/${formattedMonth}`);
+
+        const dataObj = res.data.data.jadwal;
+
+        // ✅ Object → Array
+        this.jadwal = Object.values(dataObj);
         this.error = null;
       } catch (err) {
-        this.error = "Gagal mengambil data jadwal";
-        console.error("Error fetching jadwal:", err);
+        this.error = "Gagal mengambil jadwal sholat";
+        console.error(err);
       } finally {
         this.loading = false;
       }
-    },
-    handleProvinsiChange() {
-      this.fetchKota();
-    },
-    handleKotaChange() {
-      this.fetchJadwal();
     },
   },
 };
 </script>
+
+<style></style>
